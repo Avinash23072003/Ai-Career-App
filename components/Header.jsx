@@ -8,8 +8,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -21,7 +19,7 @@ const Header = () => {
         <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
        <Link href="/">
   
-       <Image src="/avinash.png" alt="AI Career" width={200} height={70}   className="h-12  w-auto object-contain"/>
+       <Image src="/Aicareerlogo.jpg" alt="AI Career" width={1200} height={220}   className="h-16  w-auto object-contain"/>
      </Link>
 
        
