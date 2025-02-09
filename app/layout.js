@@ -16,6 +16,7 @@ export const metadata={
 }
 export default function RootLayout({ children }) {
   console.log("Clerk Key:", process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  console.log("Database url",process.env.DATABASE_URL);
   return (
  <ClerkProvider 
  appearance={{

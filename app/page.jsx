@@ -103,7 +103,7 @@ export default function Home() {
 
 
 
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">d
+    <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">
       <div className="container mx-auto px-4 md:px-6">
         <h2 className="text-3xl tracking-tighter text-center font-bold mb-12">What user's can say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3  gap-8 max-w-6xl mx-auto">
@@ -192,7 +192,7 @@ export default function Home() {
    
     <Link href="/dashboard" passHref>
     <Button size="lg" variant="secondary" className="h-11 mt-5 animate-bounce">
-        Start your journeyt todat <ArrowRight className="ml-2 h-4 w-4"></ArrowRight>
+        Start your journeyt today <ArrowRight className="ml-2 h-4 w-4"></ArrowRight>
 
     </Button>
     </Link>
