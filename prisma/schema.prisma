@@ -81,7 +81,7 @@ model IndustryInsight{
   demandLevel DemandLevel
   topSkills String[]
 
-  marketOutLook  MarketOutLook
+   marketOutlook  MarketOutLook
   keyTrends String[]
   recommendationSkills String[]
   lastUpdated DateTime @default(now())

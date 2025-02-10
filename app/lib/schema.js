@@ -6,31 +6,28 @@ export const onboardingSchema = z.object({
       required_error: 'Please select an industry',
     })
     .min(1, { message: 'Industry cannot be empty' }),
+
   subIndustry: z
     .string({
       required_error: 'Please select a specialization',
     })
     .min(1, { message: 'Specialization cannot be empty' }),
+
   bio: z
     .string()
-    .max(500, { message: 'Bio cannot exceed 500 characters' })
-    .optional()
-    .default(''),
+    .min(10, { message: 'Bio must be at least 10 characters' })
+    .max(500, { message: 'Bio cannot exceed 500 characters' }),
+
   experience: z
-    .string()
-    .transform((val) => {
-      const parsed = parseInt(val, 10);
-      if (isNaN(parsed)) {
-        return 0; // Default value or handle as needed
-      }
-      return parsed;
-    })
-    .refine((val) => val >= 0 && val <= 50, {
-      message: 'Experience must be between 0 and 50 years',
-    }),
+    .preprocess((val) => Number(val), z
+      .number({ invalid_type_error: 'Experience must be a number' })
+      .min(0, { message: 'Experience must be at least 0 years' })
+      .max(50, { message: 'Experience cannot exceed 50 years' })
+    ),
+
   skills: z
     .string()
-    .optional()
+    .min(1, { message: 'At least one skill is required' })
     .transform((val) =>
       val
         ? val

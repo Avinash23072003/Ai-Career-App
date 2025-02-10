@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -23,12 +23,21 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { updateUser } from '@/actions/user';
+import useFetch from '@/hooks/use-fetch';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 const OnboardingForm = ({ industries }) => {
   const [selectedIndustry, setSelectedIndustry] = useState(null);
   const router = useRouter();
 
-  const {register,
+  // Custom Fetch Hook
+  const { loading: updateLoading, fn: updateUserfn, data: updateResult } = useFetch(updateUser);
+
+  // Form Handling
+  const {
+    register,
     control,
     handleSubmit,
     formState: { errors },
@@ -40,28 +49,39 @@ const OnboardingForm = ({ industries }) => {
 
   const watchIndustry = watch('industry');
 
+  // Handle Form Submit
   const onSubmit = async (values) => {
-    // Handle form submission
     console.log(values);
-    // Redirect or perform other actions
-  
+    try {
+      const formattedIndustry = `${values.industry}-${values.subIndustry || 'General'}`;
+      await updateUserfn({
+        ...values,
+        industry: formattedIndustry,
+      });
+    } catch (error) {
+      console.error("Onboarding error:", error);
+      toast.error("Error updating profile");
+    }
   };
 
+  // Handle Success Response
+  useEffect(() => {
+    if (updateResult?.success && !updateLoading) {
+      toast.success("Profile completed successfully");
+      router.push("/dashboard");
+    }
+  }, [updateResult, updateLoading]);
+
   return (
-    <div className="flex items-center justify-center bg-background">
-      <Card className="w-full max-w-lg mt-15 mx-2">
+    <div className="flex items-center justify-center bg-background min-h-screen overflow-auto">
+      <Card className="w-full max-w-lg mt-10 mx-2">
         <CardHeader>
-          <CardTitle className="gradient-title text-4xl">
-            Complete your profile
-          </CardTitle>
-          <CardDescription>
-            Select your industry to get personalized career insights and
-            recommendations.
-          </CardDescription>
+          <CardTitle className="gradient-title text-4xl">Complete your profile</CardTitle>
+          <CardDescription>Select your industry to get personalized career insights and recommendations.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="space-y-6">
+            <div className="space-y-2 mt-2">
               <Label htmlFor="industry">Industry</Label>
               <Controller
                 name="industry"
@@ -70,9 +90,7 @@ const OnboardingForm = ({ industries }) => {
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
-                      setSelectedIndustry(
-                        industries.find((ind) => ind.id === value)
-                      );
+                      setSelectedIndustry(industries.find((ind) => ind.id === value));
                       setValue('subIndustry', '');
                     }}
                     value={field.value}
@@ -90,24 +108,17 @@ const OnboardingForm = ({ industries }) => {
                   </Select>
                 )}
               />
-              {errors.industry && (
-                <p className="text-sm text-red-600">
-                  {errors.industry.message}
-                </p>
-              )}
+              {errors.industry && <p className="text-sm text-red-600">{errors.industry.message}</p>}
             </div>
 
             {watchIndustry && (
-              <div className="space-y-6">
+              <div className="space-y-2 mt-2">
                 <Label htmlFor="subIndustry">Specialization</Label>
                 <Controller
                   name="subIndustry"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger id="subIndustry">
                         <SelectValue placeholder="Select your specialization" />
                       </SelectTrigger>
@@ -121,69 +132,31 @@ const OnboardingForm = ({ industries }) => {
                     </Select>
                   )}
                 />
-                {errors.subIndustry && (
-                  <p className="text-sm text-red-600">
-                    {errors.subIndustry.message}
-                  </p>
-                )}
+                {errors.subIndustry && <p className="text-sm text-red-600">{errors.subIndustry.message}</p>}
               </div>
             )}
 
-            {/* Additional form fields (bio, experience, skills) */}
-            <div className="space-y-2">
+            <div className="space-y-2 mt-2">
               <Label htmlFor="experience">Years of Experience</Label>
-              <Input
-                id="experience"
-                type="number"
-                min="0"
-                max="50"
-                placeholder="Enter your years of experience"
-                {...register('experience')}
-              />
-              {errors.experience && (
-                <p className="text-sm text-red-600">
-                  {errors.experience.message}
-                </p>
-              )}
+              <Input id="experience" type="number" min="0" max="50" placeholder="Enter your years of experience" {...register('experience')} />
+              {errors.experience && <p className="text-sm text-red-600">{errors.experience.message}</p>}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mt-2">
               <Label htmlFor="skills">Skills</Label>
-              <Input
-                id="skills"
-                placeholder="e.g., Python, Java, ..."
-                {...register('skills')}
-              />
-              <p className="text-sm text-muted-foreground">
-                Separate multiple skills with commas
-              </p>
-              {errors.skills && (
-                <p className="text-sm text-red-600">
-                  {errors.skills.message}
-                </p>
-              )}
+              <Input id="skills" placeholder="e.g., Python, Java, ..." {...register('skills')} />
+              <p className="text-sm text-muted-foreground">Separate multiple skills with commas</p>
+              {errors.skills && <p className="text-sm text-red-600">{errors.skills.message}</p>}
             </div>
 
-
-
-            <div className="space-y-2">
+            <div className="space-y-2 mt-2">
               <Label htmlFor="bio">Professional Bio</Label>
-              <Textarea
-                id="bio"
-                placeholder="Tell us about yourself"
-                className="h-32"
-                {...register('bio')}
-              />
-              
-              {errors.bio&& (
-                <p className="text-sm text-red-600">
-                  {errors.bio.message}
-                </p>
-              )}
+              <Textarea id="bio" placeholder="Tell us about yourself" className="h-32" {...register('bio')} />
+              {errors.bio && <p className="text-sm text-red-600">{errors.bio.message}</p>}
             </div>
 
-            <Button type="submit" className="mt-4">
-             Complete profile
+            <Button type="submit" className="w-full mt-4" disabled={updateLoading}>
+              {updateLoading ? <><Loader2 className="mr-2 w-4 animate-spin" />Saving...</> : "Complete Profile"}
             </Button>
           </form>
         </CardContent>
