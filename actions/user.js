@@ -6,6 +6,19 @@ import { db } from '@/lib/prisma';
 
 
 
+
+export async function createUser(clerkUserId, email, industry = "Software Engineering") {
+  return await db.user.create({
+    data: {
+      clerkUserId,
+      email,
+      industry: industry || "Software Engineering", // Ensures a default is always set
+    },
+  });
+}
+
+
+
 export async function updateUser(data) {
   const { userId } = await auth();
   if (!userId) throw new Error('Unauthorized');
@@ -28,18 +41,15 @@ export async function updateUser(data) {
 
       // If not, create it with default values
       if (!industryInsight) {
-        industryInsight = await tx.industryInsight.create({
-          data: {
-            industry: data.industry,
-            salaryRanges: [],
-            growthRate: 0,
-            demandLevel: 'MEDIUM',
-            topSkills: [],
-            marketOutlook: 'NEUTRAL',
-            keyTrends: [],
-            recommendationSkills: [],
-            nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // One week from now
-          },
+         const insights = await generateAIInsight(data.industry);
+         
+              industryInsight = await db.industryInsight.create({
+               data: {
+                 industry: data.industry,
+                 ...insights,
+                 nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                 //userId: user.id, // Ensure correct relation
+               },
         });
       }
 
@@ -97,4 +107,11 @@ export async function getUserOnboardingStatus() {
     console.error('Failed to check onboarding status:', error.message);
     return { isOnboarded: false }; // Return false instead of throwing
   }
+}
+
+export async function updateUsersWithoutIndustry() {
+  await db.user.updateMany({
+    where: { industry: null },
+    data: { industry: "Software Engineering" }, // Set a default industry
+  });
 }
